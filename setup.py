@@ -10,7 +10,7 @@
 
 from setuptools import find_packages, setup
 
-setup(name='Tracbacks',
+setup(name='TracBacks',
       version='0.2',
       packages=find_packages(exclude=['*.tests*']),
       url="https://trac-hacks.org/wiki/TracBacksPlugin",

@@ -16,6 +16,7 @@ from trac.util.html import html as tag
 
 
 class TracBacksPlugin(Component):
+
     implements(ITicketChangeListener)
 
     TRACBACK_MAGIC_NUMBER = "{{{\n#!html\n<div class=\"tracback\"></div>\n}}}\n"
@@ -68,24 +69,7 @@ class TracBacksPlugin(Component):
                     continue
 
                 tracback = self.create_tracbacks(ticket, t, comment)
-
-                # cnum is stored in the ticket_change table as an string
-                # identifying the comment number, and if applicable,
-                # the replyto comment number. If comment 8 is a reply to
-                # comment 4, the string will be '4.8'. The index is used
-                # by the TicketChangePlugin to identify the comment being
-                # edited, so we make sure to add it here.
-                change_log = [i for i in t.get_changelog()
-                              if i[2] == "comment"]
-                if change_log != []:
-                    lastchange = change_log[-1]
-                    cnum_lastchange = lastchange[3].rsplit('.', 1)
-                    cnum_lastcomment = int(cnum_lastchange[-1])
-                    cnum_thischange = str(cnum_lastcomment + 1)
-                else:
-                    cnum_thischange = "1"
-                t.save_changes(author, tracback, cnum=cnum_thischange)
-
+                t.save_changes(author, tracback)
 
     def ticket_deleted(self, ticket):
         pass
@@ -148,53 +132,3 @@ class TracBacksPlugin(Component):
         except: # Not a match. This must be a weed.
             return True
 
-#        Doug, with some very very cool regular expression prowess, produced
-#        the following regular expression that returns sentences with ticket
-#        links in them. We could use this -- and almost should -- but I'm
-#        going to use the easy method for now as it takes less expertise.
-#
-#        sentence_pattern = r"""
-#        (?:                       # This initial group isn't a matching group
-#            (?<=\.)               # End of previous sentence is a period
-#           |(?<=\.\s)             #     or period with one space
-#           |(?<=\.\s\s)           #     or period with two space
-#           |(?<=\.\s\s\s)         #     or period with three spaces
-#           |(?<=\.\s\s\s\s)       #     or period with four spaces
-#           |^                     # Or we match the beginning of the line
-#        )
-#        (                         # We match everything else and return it
-#                                  # Because of this, we don't return any other
-#                                  # matches
-#                [^\s]             # A sentence does not begin with a space
-#                (?:               # Match the beginning of the sentence
-#                    [^.]          # A sentence does not contain a period
-#                   |\.[^\s]       # unless it's part of a word, like a URL
-#                )*                # Match any length
-#
-#            (?=                   # Starting here is a duplicate of the ticketlink
-#                                  # above, but without returning any text
-#               (?<=^\#)           # Look for a TracLink Ticket at the beginning of the string
-#              |(?<=[\s,.;:!]\#)   # or on a whitespace boundary or some punctuation
-#            )
-#            (?=\d+)               # Any length ticket number (return the digits)
-#            (?=                   # Don't return the end of the ticke tink
-#               (?=\b)             # Whether it's a word boundary
-#              |$                  # Or an end of string
-#            )
-#            (?:                   # Here we match the end of the sentence
-#                                  # It follows the same rules as the beginning
-#                [^.]              # Don't match a period
-#               |\.[^\s]           # unless it's inside a word
-#            )*                    # Any length to the end of the sentence
-#            (?:                   # Here we will match the end of the sentence
-#                (?:\.             # Which is a period (returned as part of the
-#                                  # above expression
-#                    (?=\s+|$)     # then followed by unmatched whitespace or the
-#                                  # end of the line
-#                )
-#               |$                 # if there's no period, jus tthe end of the line
-#                                  # We'll accept that too
-#            )
-#        )
-#        """
-#        excerpt = re.compile(sentence_pattern, re.VERBOSE | re.MULTILINE)
