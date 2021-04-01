@@ -15,6 +15,12 @@ from trac.ticket import ITicketChangeListener, Ticket
 from trac.util.html import html as tag
 
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
+
 class TracBacksPlugin(Component):
 
     implements(ITicketChangeListener)

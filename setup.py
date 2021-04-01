@@ -11,7 +11,7 @@
 from setuptools import find_packages, setup
 
 setup(name='TracBacks',
-      version='0.2',
+      version='0.3.0',
       packages=find_packages(exclude=['*.tests*']),
       url="https://trac-hacks.org/wiki/TracBacksPlugin",
       license='3-Clause BSD',
