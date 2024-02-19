@@ -116,6 +116,7 @@ class TracBacksPlugin(Component):
 
                 excerpt = comment[start:end]
                 excerpt = excerpt.replace("\n", "")
+                excerpt = excerpt.replace("\r", "")
 
                 # There's probably a better way to say this in python, but Tim doesn't know
                 # how to do it. (He's tried """ but something's foobar'ed.)
